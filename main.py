@@ -149,8 +149,14 @@ def get_test_run_id(auth_token, test_exec_key, test_key):
     """Retrieve the Test Run ID for the given execution and test key."""
     query = f"""
     query {{
-      getTestRuns(jql: "testExecKey = '{test_exec_key}' AND testKey = '{test_key}'") {{
-        id
+      getTestRuns(
+        testExecIssueKeys: ["{test_exec_key}"],
+        testIssueKeys: ["{test_key}"],
+        limit: 1
+      ) {{
+        results {{
+          id
+        }}
       }}
     }}
     """
@@ -166,7 +172,7 @@ def get_test_run_id(auth_token, test_exec_key, test_key):
         resp.raise_for_status()
 
     data = resp.json()
-    runs = data.get("data", {}).get("getTestRuns", [])
+    runs = data.get("data", {}).get("getTestRuns", {}).get("results", [])
     return runs[0]["id"] if runs else None
 
 
