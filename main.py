@@ -129,21 +129,21 @@ def is_valid_version_name(version):
 
 
 def checkVersionITCreated(ITProjectData):
-   if(ITProjectData):
+   if(ITProjectData["status"] == 201):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
 
 def checkVersionITNPCreated(ITNPProjectData):
-   if(ITNPProjectData):
+   if(ITNPProjectData["status"] == 201):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
 
 def checkVersionITNSCreated(ITNSProjectData):
-   if(ITNSProjectData):
+   if(ITNSProjectData["status"] == 201):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
@@ -151,7 +151,7 @@ def checkVersionITNSCreated(ITNSProjectData):
 
    
 def checkVersionCreated(ITprojectData,ITNPProjectData,ITNSProjectData):
-   if(ITprojectData.status == 201 and ITNPProjectData.status == 201 and ITNSProjectData.status == 201):
+   if(ITprojectData["status"] == 201 and ITNPProjectData["status"] == 201 and ITNSProjectData["status"] == 201):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="PASSED")
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
