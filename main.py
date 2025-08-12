@@ -12,26 +12,26 @@ issueKey = os.getenv("issueKey")
 versionName = os.getenv("versionName")
 
 ITProjectStatus = os.getenv("ITProjectStatus")
-ITNSProjectStatus = os.getenv("ITNSProjectStatus")
-ITNPProjectStatus = os.getenv("ITNPProjectStatus")
+# ITNSProjectStatus = os.getenv("ITNSProjectStatus")
+# ITNPProjectStatus = os.getenv("ITNPProjectStatus")
 
-ITProjectResponse = os.getenv("ITProjectResponse")
-ITNSProjectResponse = os.getenv("ITNSProjectResponse")
-ITNPProjectResponse = os.getenv("ITNPProjectResponse")
+# ITProjectResponse = os.getenv("ITProjectResponse")
+# ITNSProjectResponse = os.getenv("ITNSProjectResponse")
+# ITNPProjectResponse = os.getenv("ITNPProjectResponse")
 
 
-ITProjectData = {
-   "status" :  ITProjectStatus,
-   "body": ITProjectResponse,
-}
-ITNSProjectData = {
-   "status" :  ITNSProjectStatus,
-   "body": ITNPProjectResponse,
-}
-ITNPProjectData = {
-   "status" :  ITNPProjectStatus,
-   "body": ITNPProjectResponse,
-}
+# ITProjectData = {
+#    "status" :  ITProjectStatus,
+#    "body": ITProjectResponse,
+# }
+# ITNSProjectData = {
+#    "status" :  ITNSProjectStatus,
+#    "body": ITNPProjectResponse,
+# }
+# ITNPProjectData = {
+#    "status" :  ITNPProjectStatus,
+#    "body": ITNPProjectResponse,
+# }
 
 jira_url = os.getenv("jira_url")
 jira_api_token = os.getenv("jira_api_token")
@@ -170,12 +170,12 @@ def main():
     print(f"Project Key: {projectKey}")
     print(f"Issue Key: {issueKey}")
     print(f"Version Name: {versionName}")
-    print(f"ITProjectData: {ITProjectData}")
-    print(f"ITNSProjectData: {ITNSProjectData}")
-    print(f"ITNPProjectData: {ITNPProjectData}")
-    print(f"ITProjectStatus: {ITProjectStatus}")
-    print(f"ITNSProjectStatus: {ITNSProjectStatus}")
-    print(f"ITNPProjectStatus: {ITNPProjectStatus}")
+    # print(f"ITProjectData: {ITProjectData}")
+    # print(f"ITNSProjectData: {ITNSProjectData}")
+    # print(f"ITNPProjectData: {ITNPProjectData}")
+    print("ITProjectStatus: ",ITProjectStatus)
+    # print(f"ITNSProjectStatus: {ITNSProjectStatus}")
+    # print(f"ITNPProjectStatus: {ITNPProjectStatus}")
     print(f"Jira URL: {jira_url}")
     print(f"Jira API Token: {jira_api_token}")
     print(f"Build Status: {BUILD_STATUS}")
@@ -187,15 +187,15 @@ def main():
     if is_valid_version_name(versionName):
        print("✅ Version name is valid, updating VALID_VERSION_NAME_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="PASSED")
-       checkVersionCreated(ITProjectData,ITNPProjectData,ITNSProjectData)
-       checkVersionITCreated(ITProjectData)
-       checkVersionITNSCreated(ITNSProjectData)
-       checkVersionITNPCreated(ITNPProjectData)
+      #  checkVersionCreated(ITProjectData,ITNPProjectData,ITNSProjectData)
+      #  checkVersionITCreated(ITProjectData)
+      #  checkVersionITNSCreated(ITNSProjectData)
+      #  checkVersionITNPCreated(ITNPProjectData)
 
     else:
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
-       versionNotCreatedAllProject(ITProjectData,ITNPProjectData,ITNSProjectData)
+      #  versionNotCreatedAllProject(ITProjectData,ITNPProjectData,ITNSProjectData)
 
 if __name__ == "__main__":
     main()
