@@ -149,14 +149,20 @@ def get_test_run_id(auth_token, test_exec_key, test_key):
     """Retrieve the Test Run ID for the given execution and test key."""
     query = f"""
     query {{
-      getTestRuns(jql: "testExecKey = '{test_exec_key}' AND testKey = '{test_key}'") {{
+      getTestRuns(jql: \\"testExecKey = '{test_exec_key}' AND testKey = '{test_key}'\\") {{
         id
       }}
     }}
     """
-    headers = {"Authorization": f"Bearer {auth_token}"}
+    headers = {
+        "Authorization": f"Bearer {auth_token}",
+        "Content-Type": "application/json"
+    }
     resp = requests.post(XRAY_GRAPHQL_URL, json={"query": query}, headers=headers)
-    resp.raise_for_status()
+    if resp.status_code != 200:
+        print("❌ Failed to get test runs")
+        print(resp.text)
+        resp.raise_for_status()
     data = resp.json()
     runs = data.get("data", {}).get("getTestRuns", [])
     return runs[0]["id"] if runs else None
