@@ -127,6 +127,7 @@ BUILD_STATUS = os.getenv("BUILD_STATUS", "SUCCESS")
 # ===== Xray Config =====
 TEST_EXCE_KEY = "MTSD-91"      # Test Execution Key
 JENKINS_CASE_TEST_KEY = "MTSD-87"  # Test Case Key
+VALID_VERSION_NAME_CASE_TEST_KEY = "MTSD-97"
 
 XRAY_GRAPHQL_URL = "https://xray.cloud.getxray.app/api/v2/graphql"
 XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
@@ -198,7 +199,11 @@ def update_test_status(test_exec_key, test_key, status="PASSED"):
     else:
         print(f"❌ Failed to update test: {resp.status_code}")
         print(resp.text)
-
+        
+def is_valid_version_name(version):
+    # Regex allows letters, digits, space, dot, underscore, hyphen only
+    pattern = r'^[a-zA-Z0-9\s._-]+$'
+    return bool(re.match(pattern, version))
 
 # ====================== Main ======================
 
@@ -220,6 +225,12 @@ def main():
    #  status = "PASSED" if BUILD_STATUS.upper() == "SUCCESS" else "FAILED"
 
     update_test_status(TEST_EXCE_KEY, JENKINS_CASE_TEST_KEY, status="PASSED")
+    if is_valid_version_name(versionName):
+       print("✅ Version name is valid, updating VALID_VERSION_NAME_CASE_TEST_KEY")
+       update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="PASSED")
+    else:
+       print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
+       update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
 
 
 if __name__ == "__main__":
