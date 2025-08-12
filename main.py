@@ -17,61 +17,71 @@ jira_url = os.getenv("jira_url")
 jira_api_token = os.getenv("jira_api_token")
 jira_email = "jananipriya.s@cprime.com"
 
-JENKINS_EXCE_TEST_KEY = "MTSD-87"
+TEST_EXCE_KEY = "MTSD-91"
+JENKINS_CASE_TEST_KEY = "MTSD-87"
 
-def update_test_status(test_key, status="PASSED"):
-    print(f"📌 Updating test {test_key} to {status}...")
+XRAY_GRAPHQL_URL = "https://xray.cloud.getxray.app/api/v2/graphql"
+XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
 
-    # Step 1: Authenticate with Xray to get token
-    auth_payload = {
+
+def get_xray_token():
+    payload = {
         "client_id": xray_client_id,
         "client_secret": xray_client_secret
     }
-    auth_response = requests.post(
-        "https://xray.cloud.getxray.app/api/v2/authenticate",
-        json=auth_payload
-    )
+    resp = requests.post(XRAY_AUTH_URL, json=payload)
+    resp.raise_for_status()
+    # The token is returned as a plain string, not JSON
+    return resp.text.strip().strip('"')
 
-    if auth_response.status_code != 200:
-        print(f"❌ Failed to authenticate with Xray: {auth_response.status_code}")
-        print(auth_response.text)
-        return
-
-    auth_token = auth_response.json()
-
-    # Step 2: Send GraphQL mutation to update test status
-    graphql_url = "https://xray.cloud.getxray.app/api/v2/graphql"
-
-    mutation = f"""
-    mutation {{
-      updateTestRunStatus(
-        issueId: "{test_key}",
-        status: {status}
-      ) {{
-        warnings
-        errors
+def get_test_run_id(auth_token, test_exec_key, test_key):
+    query = f"""
+    query {{
+      getTestRuns(jql: "testExecKey = '{test_exec_key}' AND testKey = '{test_key}'") {{
+        id
       }}
     }}
     """
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    resp = requests.post(XRAY_GRAPHQL_URL, json={"query": query}, headers=headers)
+    resp.raise_for_status()
+    data = resp.json()
+    runs = data.get("data", {}).get("getTestRuns", [])
+    return runs[0]["id"] if runs else None
 
+def update_test_status(test_exec_key, test_key, status="PASSED"):
+    print(f"📌 Updating {test_key} in execution {test_exec_key} to {status}...")
+
+    # Step 1: Authenticate
+    auth_token = get_xray_token()
+
+    # Step 2: Find the Test Run ID
+    test_run_id = get_test_run_id(auth_token, test_exec_key, test_key)
+    if not test_run_id:
+        print("❌ Could not find Test Run ID for that test in this execution.")
+        return
+
+    # Step 3: Update the status
+    mutation = f"""
+    mutation {{
+      updateTestRunStatus(
+        id: "{test_run_id}",
+        status: "{status}"
+      )
+    }}
+    """
     headers = {
         "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json"
     }
+    resp = requests.post(XRAY_GRAPHQL_URL, json={"query": mutation}, headers=headers)
 
-    response = requests.post(
-        graphql_url,
-        json={"query": mutation},
-        headers=headers
-    )
-
-    if response.status_code == 200:
+    if resp.status_code == 200:
         print("✅ Test case updated successfully!")
-        print(response.json())
+        print(resp.json())
     else:
-        print(f"❌ Failed to update test: {response.status_code}")
-        print(response.text)
-
+        print(f"❌ Failed to update test: {resp.status_code}")
+        print(resp.text)
 
 def main():
     print("✅ Reading variables from Jenkins...")
@@ -85,7 +95,7 @@ def main():
     print(f"ITNPProjectData: {ITNPProjectData}")
     print(f"Jira URL: {jira_url}")
     print(f"Jira API Token: {jira_api_token}")
-    update_test_status(JENKINS_EXCE_TEST_KEY, "PASS")
+    update_test_status(TEST_EXCE_KEY,JENKINS_CASE_TEST_KEY, "PASS")
 
 if __name__ == "__main__":
     main()
