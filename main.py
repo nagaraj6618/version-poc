@@ -19,46 +19,58 @@ jira_email = "jananipriya.s@cprime.com"
 
 JENKINS_EXCE_TEST_KEY = "MTSD-87"
 
-
-def update_test_status(test_key, status="PASS"):
+def update_test_status(test_key, status="PASSED"):
     print(f"📌 Updating test {test_key} to {status}...")
 
-    # Xray test execution API endpoint
-    url = f"{jira_url}/rest/raven/1.0/import/execution"
-
-    payload = {
-        "testExecutionKey": test_key,
-        "info": {
-            "summary": "Automated test execution from Jenkins",
-            "description": "Updated by Jenkins pipeline after main() run",
-            "version": versionName,
-            "user": jira_email
-        },
-        "tests": [
-            {
-                "testKey": test_key,
-                "status": status
-            }
-        ]
+    # Step 1: Authenticate with Xray to get token
+    auth_payload = {
+        "client_id": xray_client_id,
+        "client_secret": xray_client_secret
     }
+    auth_response = requests.post(
+        "https://xray.cloud.getxray.app/api/v2/authenticate",
+        json=auth_payload
+    )
+
+    if auth_response.status_code != 200:
+        print(f"❌ Failed to authenticate with Xray: {auth_response.status_code}")
+        print(auth_response.text)
+        return
+
+    auth_token = auth_response.json()
+
+    # Step 2: Send GraphQL mutation to update test status
+    graphql_url = "https://xray.cloud.getxray.app/api/v2/graphql"
+
+    mutation = f"""
+    mutation {{
+      updateTestRunStatus(
+        issueId: "{test_key}",
+        status: {status}
+      ) {{
+        warnings
+        errors
+      }}
+    }}
+    """
 
     headers = {
+        "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json"
     }
 
     response = requests.post(
-        url,
-        headers=headers,
-        data=json.dumps(payload),
-        auth=HTTPBasicAuth(jira_email, jira_api_token)
+        graphql_url,
+        json={"query": mutation},
+        headers=headers
     )
 
     if response.status_code == 200:
         print("✅ Test case updated successfully!")
+        print(response.json())
     else:
         print(f"❌ Failed to update test: {response.status_code}")
         print(response.text)
-
 
 
 def main():
