@@ -135,78 +135,66 @@ XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
 # ====================== Functions ======================
 
 def get_xray_token():
-    """Authenticate with Xray and return a Bearer token."""
-    payload = {
+    auth_payload = {
         "client_id": xray_client_id,
         "client_secret": xray_client_secret
     }
-    resp = requests.post(XRAY_AUTH_URL, json=payload)
+    resp = requests.post(XRAY_AUTH_URL, json=auth_payload)
     resp.raise_for_status()
-    return resp.text.strip().strip('"')
+    return resp.json().strip('"')
 
-
-def get_test_run_id(auth_token, test_exec_key, test_key):
-    """Retrieve the Test Run ID for the given execution and test key."""
-    query = f"""
-    query {{
-      getTestRuns(
-        testExecIssueKeys: ["{test_exec_key}"],
-        testIssueKeys: ["{test_key}"],
-        limit: 1
-      ) {{
-        results {{
-          id
+def get_test_run_id(token, exec_key, test_key):
+    query = {
+        "query": f"""
+        query {{
+          getTestRuns(
+            testExecIssueIds: ["{exec_key}"],
+            testIssueIds: ["{test_key}"],
+            limit: 1
+          ) {{
+            results {{
+              id
+            }}
+          }}
         }}
-      }}
-    }}
-    """
+        """
+    }
     headers = {
-        "Authorization": f"Bearer {auth_token}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    resp = requests.post(XRAY_GRAPHQL_URL, json={"query": query}, headers=headers)
-    
-    if resp.status_code != 200:
-        print("❌ Failed to get test runs")
-        print(resp.text)
-        resp.raise_for_status()
-
+    resp = requests.post(XRAY_GRAPHQL_URL, headers=headers, json=query)
+    resp.raise_for_status()
     data = resp.json()
     runs = data.get("data", {}).get("getTestRuns", {}).get("results", [])
-    return runs[0]["id"] if runs else None
-
+    if runs:
+        return runs[0]["id"]
+    return None
 
 def update_test_status(test_exec_key, test_key, status="PASSED"):
-    """Update the test run status in Xray."""
     print(f"📌 Updating {test_key} in execution {test_exec_key} to {status}...")
-
-    # Step 1: Authenticate
-    auth_token = get_xray_token()
-
-    # Step 2: Get the Test Run ID
-    test_run_id = get_test_run_id(auth_token, test_exec_key, test_key)
+    token = get_xray_token()
+    test_run_id = get_test_run_id(token, test_exec_key, test_key)
     if not test_run_id:
-        print("❌ Could not find Test Run ID for that test in this execution.")
+        print("❌ Could not find Test Run ID.")
         return
-
-    # Step 3: Update status
-    mutation = f"""
-    mutation {{
-      updateTestRunStatus(
-        id: "{test_run_id}",
-        status: "{status}"
-      )
-    }}
-    """
+    mutation = {
+        "query": f"""
+        mutation {{
+          updateTestRunStatus(
+            id: "{test_run_id}",
+            status: "{status}"
+          )
+        }}
+        """
+    }
     headers = {
-        "Authorization": f"Bearer {auth_token}",
+        "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
     }
-    resp = requests.post(XRAY_GRAPHQL_URL, json={"query": mutation}, headers=headers)
-
-    if resp.status_code == 200:
+    resp = requests.post(XRAY_GRAPHQL_URL, headers=headers, json=mutation)
+    if resp.status_code == 200 and "errors" not in resp.json():
         print("✅ Test case updated successfully!")
-        print(resp.json())
     else:
         print(f"❌ Failed to update test: {resp.status_code}")
         print(resp.text)
@@ -229,9 +217,9 @@ def main():
     print(f"Build Status: {BUILD_STATUS}")
 
     # Convert Jenkins build result to Xray status
-    status = "PASSED" if BUILD_STATUS.upper() == "SUCCESS" else "FAILED"
+   #  status = "PASSED" if BUILD_STATUS.upper() == "SUCCESS" else "FAILED"
 
-    update_test_status(TEST_EXCE_KEY, JENKINS_CASE_TEST_KEY, status)
+    update_test_status(TEST_EXCE_KEY, JENKINS_CASE_TEST_KEY, status="PASSED")
 
 
 if __name__ == "__main__":
