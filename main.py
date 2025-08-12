@@ -189,15 +189,15 @@ def main():
     if is_valid_version_name(versionName):
        print("✅ Version name is valid, updating VALID_VERSION_NAME_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="PASSED")
-       checkVersionCreated(ITProjectData,ITNPProjectData,ITNSProjectData)
-       checkVersionITCreated(ITProjectData)
-       checkVersionITNSCreated(ITNSProjectData)
-       checkVersionITNPCreated(ITNPProjectData)
+       checkVersionCreated(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus)
+       checkVersionITCreated(ITProjectStatus)
+       checkVersionITNSCreated(ITNSProjectStatus)
+       checkVersionITNPCreated(ITNPProjectStatus)
 
     else:
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
-       versionNotCreatedAllProject(ITProjectData,ITNPProjectData,ITNSProjectData)
+       versionNotCreatedAllProject(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus)
 
 if __name__ == "__main__":
     main()
