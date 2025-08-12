@@ -20,19 +20,6 @@ ITNSProjectResponse = os.getenv("ITNSProjectResponse")
 ITNPProjectResponse = os.getenv("ITNPProjectResponse")
 
 
-ITProjectData = {
-   "status" :  ITProjectStatus,
-   "body": ITProjectResponse,
-}
-ITNSProjectData = {
-   "status" :  ITNSProjectStatus,
-   "body": ITNPProjectResponse,
-}
-ITNPProjectData = {
-   "status" :  ITNPProjectStatus,
-   "body": ITNPProjectResponse,
-}
-
 jira_url = os.getenv("jira_url")
 jira_api_token = os.getenv("jira_api_token")
 jira_email = "jananipriya.s@cprime.com"
@@ -48,6 +35,10 @@ VERSION_CREATED_ALL_PRO_CASE_TEST_KEY = "MTSD-104"
 VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY = "MTSD-105"
 VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY = "MTSD-106"
 VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY = "MTSD-107"
+VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY = "MTSD-108"
+VERSION_NOT_EXIST_ALL_ITPRO_CASE_TEST_KEY = "MTSD-109"
+VERSION_NOT_EXIST_ALL_ITNPPRO_CASE_TEST_KEY = "MTSD-110"
+VERSION_NOT_EXIST_ALL_ITNSPRO_CASE_TEST_KEY = "MTSD-111"
 
 XRAY_GRAPHQL_URL = "https://xray.cloud.getxray.app/api/v2/graphql"
 XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
@@ -131,37 +122,52 @@ def is_valid_version_name(version):
 def checkVersionITCreated(ITProjectStatus):
    if(ITProjectStatus == "201"):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="PASSED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
 
 def checkVersionITNPCreated(ITNPProjectStatus):
    if(ITNPProjectStatus == "201"):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="PASSED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNPPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
 
 def checkVersionITNSCreated(ITNSProjectStatus):
    if(ITNSProjectStatus == "201"):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="PASSED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNSPRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
 
    
 def checkVersionCreated(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus):
    if(ITProjectStatus == "201" and ITNPProjectStatus == "201" and ITNSProjectStatus == "201"):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="PASSED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY,status="PASSED")
 
    else:
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
+      update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY,status="FAILED")
 
 def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
+
+def versionNotExist():
+   update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY,status="TO DO")
+   update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITPRO_CASE_TEST_KEY,status="TO DO")
+   update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNPPRO_CASE_TEST_KEY,status="TO DO")
+   update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_ITNSPRO_CASE_TEST_KEY,status="TO DO")
+
 # ====================== Main ======================
 
 def main():
@@ -170,10 +176,6 @@ def main():
     print(f"Xray Client Secret: {xray_client_secret}")
     print(f"Project Key: {projectKey}")
     print(f"Issue Key: {issueKey}")
-    print(f"Version Name: {versionName}")
-    print(f"ITProjectData: {ITProjectData}")
-    print(f"ITNSProjectData: {ITNSProjectData}")
-    print(f"ITNPProjectData: {ITNPProjectData}")
     print("ITProjectStatus: ",ITProjectStatus)
     print(f"ITNSProjectStatus: {ITNSProjectStatus}")
     print(f"ITNPProjectStatus: {ITNPProjectStatus}")
@@ -197,6 +199,7 @@ def main():
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
        versionNotCreatedAllProject(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus)
+       versionNotExist();
 
 if __name__ == "__main__":
     main()
