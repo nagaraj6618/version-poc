@@ -153,7 +153,9 @@ def checkVersionITNSCreated(ITNSProjectStatus):
 def checkVersionCreated(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus):
    if(ITProjectStatus == "201" and ITNPProjectStatus == "201" and ITNSProjectStatus == "201"):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="PASSED")
+
    else:
+      print("Everything is failing : ",ITNPProjectStatus,ITNSProjectStatus,ITProjectStatus)
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
 
 def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
