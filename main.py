@@ -155,7 +155,6 @@ def checkVersionCreated(ITProjectStatus,ITNPProjectStatus,ITNSProjectStatus):
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="PASSED")
 
    else:
-      print("Everything is failing : ",ITNPProjectStatus,ITNSProjectStatus,ITProjectStatus)
       update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
 
 def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
