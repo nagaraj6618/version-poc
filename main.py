@@ -10,9 +10,27 @@ xray_client_secret = os.getenv("xray_client_secret")
 projectKey = os.getenv("projectKey")
 issueKey = os.getenv("issueKey")
 versionName = os.getenv("versionName")
-ITProjectData = os.getenv("ITProjectData")
-ITNSProjectData = os.getenv("ITNSProjectData")
-ITNPProjectData = os.getenv("ITNPProjectData")
+ITProjectStatus = os.getenv("ITNPProjectStatus")
+ITNSProjectStatus = os.getenv("ITNPProjectStatus")
+ITNPProjectStatus = os.getenv("ITNPProjectStatus")
+
+ITProjectResponse = os.getenv("ITProjectResponse")
+ITNSProjectResponse = os.getenv("ITNSProjectResponse")
+ITNPProjectResponse = os.getenv("ITNPProjectResponse")
+
+
+ITProjectData = {
+   "status" :  ITProjectStatus,
+   "body": ITProjectResponse,
+}
+ITNSProjectData = {
+   "status" :  ITNSProjectStatus,
+   "body": ITNPProjectResponse,
+}
+ITNPProjectData = {
+   "status" :  ITNPProjectStatus,
+   "body": ITNPProjectResponse,
+}
 
 jira_url = os.getenv("jira_url")
 jira_api_token = os.getenv("jira_api_token")
