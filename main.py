@@ -11,8 +11,8 @@ projectKey = os.getenv("projectKey")
 issueKey = os.getenv("issueKey")
 versionName = os.getenv("versionName")
 
-ITProjectStatus = os.getenv("ITNPProjectStatus")
-ITNSProjectStatus = os.getenv("ITNPProjectStatus")
+ITProjectStatus = os.getenv("ITProjectStatus")
+ITNSProjectStatus = os.getenv("ITNSProjectStatus")
 ITNPProjectStatus = os.getenv("ITNPProjectStatus")
 
 ITProjectResponse = os.getenv("ITProjectResponse")
