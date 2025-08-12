@@ -1,4 +1,7 @@
 import os
+import json
+import requests
+from requests.auth import HTTPBasicAuth
 
 xray_client_id = os.getenv("xray_client_id")
 xray_client_secret = os.getenv("xray_client_secret")
