@@ -25,6 +25,10 @@ BUILD_STATUS = os.getenv("BUILD_STATUS", "SUCCESS")
 TEST_EXCE_KEY = "MTSD-91"      # Test Execution Key
 JENKINS_CASE_TEST_KEY = "MTSD-87"  # Test Case Key
 VALID_VERSION_NAME_CASE_TEST_KEY = "MTSD-97"
+VERSION_CREATED_ALL_PRO_CASE_TEST_KEY = "MTSD-104"
+VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY = "MTSD-105"
+VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY = "MTSD-106"
+VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY = "MTSD-107"
 
 XRAY_GRAPHQL_URL = "https://xray.cloud.getxray.app/api/v2/graphql"
 XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
@@ -102,6 +106,42 @@ def is_valid_version_name(version):
     pattern = r'^[a-zA-Z0-9\s._-]+$'
     return bool(re.match(pattern, version))
 
+
+
+
+def checkVersionITCreated(ITProjectData):
+   if(ITProjectData):
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="PASSED")
+
+   else:
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
+
+def checkVersionITCreated(ITNPProjectData):
+   if(ITNPProjectData):
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="PASSED")
+
+   else:
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
+
+def checkVersionITNSCreated(ITNSProjectData):
+   if(ITNSProjectData):
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="PASSED")
+
+   else:
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
+
+   
+def checkVersionCreated(ITprojectData,ITNPProjectData,ITNSProjectData):
+   if(ITprojectData.status == 201 and ITNPProjectData.status == 201 and ITNSProjectData.status == 201):
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="PASSED")
+   else:
+      update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
+
+def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
+   update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_PRO_CASE_TEST_KEY,status="FAILED")
+   update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
+   update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
+   update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
 # ====================== Main ======================
 
 def main():
@@ -125,10 +165,15 @@ def main():
     if is_valid_version_name(versionName):
        print("✅ Version name is valid, updating VALID_VERSION_NAME_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="PASSED")
+       checkVersionCreated(ITProjectData,ITNPProjectData,ITNSProjectData)
+       checkVersionITCreated(ITProjectData)
+       checkVersionITNSCreated(ITNSProjectData)
+       checkVersionITNPCreated(ITNPProjectData)
+
     else:
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
-
+       versionNotCreatedAllProject(ITProjectData,ITNPProjectData,ITNSProjectData)
 
 if __name__ == "__main__":
     main()
