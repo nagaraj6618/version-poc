@@ -128,6 +128,40 @@ def determine_priority(failed_count):
     else:
         return "Low"  # fallback, ideally no bug if none failed
 
+def link_issues(inward_key, outward_key, link_type="Relates"):
+    """
+    Link two Jira issues.
+    inward_key: source issue (usually the bug)
+    outward_key: target issue (usually the test execution)
+    link_type: type of link, e.g. "Relates", "Blocks", "Causes", etc.
+    """
+    url = f"{jira_url}/rest/api/2/issueLink"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    auth = (jira_email, jira_api_token)
+
+    payload = {
+        "type": {
+            "name": link_type
+        },
+        "inwardIssue": {
+            "key": inward_key
+        },
+        "outwardIssue": {
+            "key": outward_key
+        }
+    }
+
+    response = requests.post(url, headers=headers, auth=auth, json=payload)
+
+    if response.status_code == 201:
+        print(f"✅ Issues linked successfully: {inward_key} -> {outward_key}")
+    else:
+        print(f"❌ Failed to link issues: {response.status_code} - {response.text}")
+
+
 def create_jira_bug_with_priority(summary, description, priority):
     url = f"{jira_url}/rest/api/2/issue"
     headers = {
@@ -158,6 +192,13 @@ def create_jira_bug_with_priority(summary, description, priority):
     else:
         print(f"❌ Failed to create Jira Bug: {response.status_code} - {response.text}")
         return None
+
+def create_jira_bug_with_priority_and_link(summary, description, priority, test_execution_key):
+    issue_key = create_jira_bug_with_priority(summary, description, priority)
+    if issue_key:
+        # Link bug to test execution ticket
+        link_issues(issue_key, test_execution_key, link_type="Relates")
+
 
 def checkVersionITCreated(ITProjectStatus):
    if(ITProjectStatus == "201"):
@@ -214,7 +255,7 @@ def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
       description += f"- ITNS Project (Status: {ITNSProjectStatus})\n"
    description += "\nPlease investigate."
 
-   create_jira_bug_with_priority(summary, description, priority)
+   create_jira_bug_with_priority_and_link(summary, description, priority,TEST_EXCE_KEY)
 
 def versionNotExist():
    update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY,status="TO DO")
@@ -267,7 +308,7 @@ def main():
        description += "\nPlease investigate."
        priority = determine_priority(failed_projects)
        if(failed_projects>0):
-        create_jira_bug_with_priority(summary, description, priority)
+        create_jira_bug_with_priority_and_link(summary, description, priority,TEST_EXCE_KEY)
 
     else:
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
