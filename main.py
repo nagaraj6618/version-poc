@@ -64,6 +64,7 @@ def get_error_message(response_str):
     Extract the 'name' error message from the response string if present.
     """
     response_dict = parse_response_to_dict(response_str)
+    print("Response disct : ",response_dict,response_dict["errors"] );
     if 'errors' in response_dict:
         return response_dict['errors'].get('name')
     return None
