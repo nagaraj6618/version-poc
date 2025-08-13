@@ -65,7 +65,7 @@ def get_error_message(response_str):
     """
     print("The type response : ",type(response_str))
     response_dict = parse_response_to_dict(response_str)
-    print("The type response : ",type(response_dict,response_dict))
+    print("The type response : ",type(response_dict),response_dict)
     # print("Response disct : ",response_dict,response_dict["errors"] );
     if 'errors' in response_dict:
         return response_dict['errors'].get('name')
