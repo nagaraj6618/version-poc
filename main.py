@@ -249,6 +249,26 @@ def main():
        checkVersionITNSCreated(ITNSProjectStatus)
        checkVersionITNPCreated(ITNPProjectStatus)
 
+
+       failed_projects = 0
+
+       
+       summary = f"Version creation failed for project {projectKey}, issue {issueKey}"
+       description = f"Version '{versionName}' creation failed for the following projects:\n"
+       if ITProjectStatus != "201":
+          failed_projects += 1
+          description += f"- IT Project (Status: {ITProjectStatus} and Error:{ITProjectResponse})\n"
+       if ITNPProjectStatus != "201":
+          failed_projects += 1
+          description += f"- ITNP Project (Status: {ITNPProjectStatus} and Error:{ITNPProjectResponse})\n"
+       if ITNSProjectStatus != "201":
+          failed_projects += 1
+          description += f"- ITNS Project (Status: {ITNSProjectStatus} and Error:{ITNSProjectResponse})\n"
+       description += "\nPlease investigate."
+       priority = determine_priority(failed_projects)
+       if(failed_projects>0):
+        create_jira_bug_with_priority(summary, description, priority)
+
     else:
        print("⚠️ Version name contains invalid characters, updating JENKINS_CASE_TEST_KEY")
        update_test_status(TEST_EXCE_KEY, VALID_VERSION_NAME_CASE_TEST_KEY, status="FAILED")
