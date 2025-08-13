@@ -45,6 +45,29 @@ XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
 
 
 # ====================== Functions ======================
+def parse_response_to_dict(response_str):
+    """
+    Convert a JSON string response to a dictionary safely.
+    Return an empty dict if parsing fails.
+    """
+    try:
+        # Try to parse string as JSON
+        response_dict = json.loads(response_str)
+        return response_dict
+    except json.JSONDecodeError:
+        # Parsing failed, return empty dict
+        print("Warning: Failed to parse response string as JSON.")
+        return {}
+
+def get_error_message(response_str):
+    """
+    Extract the 'name' error message from the response string if present.
+    """
+    response_dict = parse_response_to_dict(response_str)
+    if 'errors' in response_dict:
+        return response_dict['errors'].get('name')
+    return None
+
 
 def get_xray_token():
     auth_payload = {
@@ -247,12 +270,11 @@ def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
    priority = determine_priority(3)
    summary = f"Version creation failed for project {projectKey}, issue {issueKey}"
    description = f"Version '{versionName}' creation failed for the following projects:\n"
-   if ITProjectStatus != "201":
-      description += f"- IT Project (Status: {ITProjectStatus})\n"
-   if ITNPProjectStatus != "201":
-      description += f"- ITNP Project (Status: {ITNPProjectStatus})\n"
-   if ITNSProjectStatus != "201":
-      description += f"- ITNS Project (Status: {ITNSProjectStatus})\n"
+   description += f"- IT Project Invalid Version name\n"
+
+   description += f"- ITNP Project Invalid Version name\n"
+
+   description += f"- ITNS Project Invalid Version name\n"
    description += "\nPlease investigate."
 
    create_jira_bug_with_priority_and_link(summary, description, priority,TEST_EXCE_KEY)
@@ -298,7 +320,7 @@ def main():
        description = f"Version '{versionName}' creation failed for the following projects:\n"
        if ITProjectStatus != "201":
           failed_projects += 1
-          description += f"- IT Project (Status: {ITProjectStatus} and Error:{ITProjectResponse})\n"
+          description += f"- IT Project (Status: {ITProjectStatus} and Error:{get_error_message(ITProjectResponse)})\n"
        if ITNPProjectStatus != "201":
           failed_projects += 1
           description += f"- ITNP Project (Status: {ITNPProjectStatus} and Error:{ITNPProjectResponse})\n"
