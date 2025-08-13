@@ -118,6 +118,46 @@ def is_valid_version_name(version):
 
 
 
+def determine_priority(failed_count):
+    if failed_count == 3:
+        return "High"
+    elif failed_count == 2:
+        return "Highest"
+    elif failed_count == 1:
+        return "Medium"
+    else:
+        return "Low"  # fallback, ideally no bug if none failed
+
+def create_jira_bug_with_priority(summary, description, priority):
+    url = f"{jira_url}/rest/api/2/issue"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    auth = (jira_email, jira_api_token)
+    payload = {
+        "fields": {
+            "project": {
+                "key": projectKey
+            },
+            "summary": summary,
+            "description": description,
+            "issuetype": {
+                "name": "Bug"
+            },
+            "priority": {
+                "name": priority
+            }
+        }
+    }
+    response = requests.post(url, headers=headers, auth=auth, json=payload)
+    if response.status_code == 201:
+        issue_key = response.json().get("key")
+        print(f"✅ Jira Bug created successfully with priority '{priority}': {issue_key}")
+        return issue_key
+    else:
+        print(f"❌ Failed to create Jira Bug: {response.status_code} - {response.text}")
+        return None
 
 def checkVersionITCreated(ITProjectStatus):
    if(ITProjectStatus == "201"):
@@ -161,6 +201,20 @@ def versionNotCreatedAllProject(ITprojectData,ITNPProjectData,ITNSProjectData):
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITPRO_CASE_TEST_KEY,status="FAILED")
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNSPRO_CASE_TEST_KEY,status="FAILED")
    update_test_status(TEST_EXCE_KEY,VERSION_CREATED_ALL_ITNPPRO_CASE_TEST_KEY,status="FAILED")
+
+   
+   priority = determine_priority(3)
+   summary = f"Version creation failed for project {projectKey}, issue {issueKey}"
+   description = f"Version '{versionName}' creation failed for the following projects:\n"
+   if ITProjectStatus != "201":
+      description += f"- IT Project (Status: {ITProjectStatus})\n"
+   if ITNPProjectStatus != "201":
+      description += f"- ITNP Project (Status: {ITNPProjectStatus})\n"
+   if ITNSProjectStatus != "201":
+      description += f"- ITNS Project (Status: {ITNSProjectStatus})\n"
+   description += "\nPlease investigate."
+
+   create_jira_bug_with_priority(summary, description, priority)
 
 def versionNotExist():
    update_test_status(TEST_EXCE_KEY,VERSION_NOT_EXIST_ALL_PRO_CASE_TEST_KEY,status="TO DO")
