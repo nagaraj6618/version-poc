@@ -45,32 +45,17 @@ XRAY_AUTH_URL = "https://xray.cloud.getxray.app/api/v2/authenticate"
 
 
 # ====================== Functions ======================
-def parse_response_to_dict(response_str):
+def extract_error_name(response_str):
     """
-    Convert a JSON string response to a dictionary safely.
-    Return an empty dict if parsing fails.
+    Extract the value of 'name' from the non-JSON error string.
+    Example input: {errorMessages=[], errors={name=A version with this name already exists in this project.}}
+    Returns: "A version with this name already exists in this project." or None if not found
     """
-    try:
-        # Try to parse string as JSON
-        response_dict = json.loads(response_str)
-        return response_dict
-    except json.JSONDecodeError:
-        # Parsing failed, return empty dict
-        print("Warning: Failed to parse response string as JSON.")
-        return {}
-
-def get_error_message(response_str):
-    """
-    Extract the 'name' error message from the response string if present.
-    """
-    print("The type response : ",type(response_str))
-    response_dict = parse_response_to_dict(response_str)
-    print("The type response : ",type(response_dict),response_dict)
-    # print("Response disct : ",response_dict,response_dict["errors"] );
-    if 'errors' in response_dict:
-        return response_dict['errors'].get('name')
+    # Regex to find name= followed by any chars until } or end of string
+    match = re.search(r'errors=([^}]+)', response_str)
+    if match:
+        return match.group(1).strip()
     return None
-
 
 def get_xray_token():
     auth_payload = {
@@ -323,14 +308,17 @@ def main():
        description = f"Version '{versionName}' creation failed for the following projects:\n"
        if ITProjectStatus != "201":
           failed_projects += 1
-          description += f"- IT Project (Status: {ITProjectStatus} and Error:{get_error_message(ITProjectResponse)})\n"
+          error_msg = extract_error_name(ITProjectResponse)
+          description += f"- IT Project (Status: {ITProjectStatus} and Error: {error_msg if error_msg else ITProjectResponse})\n"
        if ITNPProjectStatus != "201":
           failed_projects += 1
-          description += f"- ITNP Project (Status: {ITNPProjectStatus} and Error:{ITNPProjectResponse})\n"
+          error_msg = extract_error_name(ITNPProjectResponse)
+          description += f"- ITNP Project (Status: {ITNPProjectStatus} and Error: {error_msg if error_msg else ITNPProjectResponse})\n"
        if ITNSProjectStatus != "201":
           failed_projects += 1
-          description += f"- ITNS Project (Status: {ITNSProjectStatus} and Error:{ITNSProjectResponse})\n"
-       description += "\nPlease investigate."
+          error_msg = extract_error_name(ITNSProjectResponse)
+          description += f"- ITNS Project (Status: {ITNSProjectStatus} and Error: {error_msg if error_msg else ITNSProjectResponse})\n"
+       description += "\nPlease Check."
        priority = determine_priority(failed_projects)
        if(failed_projects>0):
         create_jira_bug_with_priority_and_link(summary, description, priority,TEST_EXCE_KEY)
